@@ -94,30 +94,30 @@ export default function BulkRegisterPage() {
           {parts.map((part, idx) => (
             <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
               <div className="col-span-1 md:col-span-5">
-                <label className="block md:hidden text-xs text-gray-600 font-bold mb-1">部品名称</label>
+                <label className="block text-xs text-gray-700 font-extrabold mb-1">部品名称</label>
                 <input 
                   type="text" 
-                  className="w-full border-b border-gray-300 py-2 focus:border-blue-600 outline-none text-gray-900 font-medium placeholder:text-gray-400"
+                  className="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none text-black font-bold text-lg placeholder:text-gray-400"
                   value={part.part_name}
                   onChange={(e) => updateRow(idx, 'part_name', e.target.value)}
                   placeholder="例: オイルシール"
                 />
               </div>
               <div className="col-span-1 md:col-span-4">
-                <label className="block md:hidden text-xs text-gray-600 font-bold mb-1">部品番号</label>
+                <label className="block text-xs text-gray-700 font-extrabold mb-1">部品番号</label>
                 <input 
                   type="text" 
-                  className="w-full border-b border-gray-300 py-2 focus:border-blue-600 outline-none font-mono text-blue-700 font-bold placeholder:text-gray-400"
+                  className="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none font-mono text-black font-black text-lg placeholder:text-gray-400"
                   value={part.part_number}
                   onChange={(e) => updateRow(idx, 'part_number', e.target.value)}
                   placeholder="例: MH034180"
                 />
               </div>
               <div className="col-span-1 md:col-span-2">
-                <label className="block md:hidden text-xs text-gray-600 font-bold mb-1">個数</label>
+                <label className="block text-xs text-gray-700 font-extrabold mb-1">個数</label>
                 <input 
                   type="number" 
-                  className="w-full border-b border-gray-300 py-2 focus:border-blue-600 outline-none text-center text-gray-900 font-bold"
+                  className="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none text-center text-black font-black text-xl"
                   value={part.quantity}
                   onChange={(e) => updateRow(idx, 'quantity', parseInt(e.target.value) || 0)}
                 />
