@@ -1,65 +1,127 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useEffect, useCallback } from 'react'
+import { supabase } from '@/lib/supabase'
+import { Search, Camera, Plus, Package } from 'lucide-react'
+import Link from 'next/link'
+
+type Part = {
+  id: string
+  vin: string | null
+  part_number: string
+  part_name: string
+  spec: string | null
+  category: string | null
+}
+
+export default function HomePage() {
+  const [query, setQuery] = useState('')
+  const [parts, setParts] = useState<Part[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const handleSearch = useCallback(async (searchQuery: string) => {
+    if (!searchQuery.trim()) {
+      setParts([])
+      return
+    }
+
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('parts')
+      .select('*')
+      .or(`vin.ilike.%${searchQuery}%,part_name.ilike.%${searchQuery}%,spec.ilike.%${searchQuery}%,part_number.ilike.%${searchQuery}%`)
+      .limit(50)
+
+    if (error) {
+      console.error(error)
+    } else {
+      setParts(data || [])
+    }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSearch(query)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [query, handleSearch])
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
+            <Package size={24} />
+            ふそう部品検索
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+          <div className="flex gap-2">
+            <Link href="/register" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+              <Plus size={24} />
+            </Link>
+            <Link href="/ocr" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+              <Camera size={24} />
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Search Bar */}
+        <div className="relative mb-8">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            placeholder="車体番号、品名(電球など)、スペック(24Vなど)で検索"
+            className="block w-full pl-10 pr-3 py-4 border-none bg-white rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 text-lg"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Results */}
+        <div className="space-y-4">
+          {loading ? (
+            <div className="text-center py-10 text-gray-500">検索中...</div>
+          ) : parts.length > 0 ? (
+            parts.map((part) => (
+              <div key={part.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
+                <div className="flex justify-between items-start mb-2">
+                  <h2 className="text-lg font-bold text-gray-800">{part.part_name}</h2>
+                  <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded">
+                    {part.category || '部品'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">部品番号</p>
+                    <p className="font-mono text-lg font-bold text-blue-600">{part.part_number}</p>
+                  </div>
+                  {part.vin && (
+                    <div>
+                      <p className="text-gray-500">車体番号</p>
+                      <p className="font-medium text-gray-800">{part.vin}</p>
+                    </div>
+                  )}
+                  {part.spec && (
+                    <div className="col-span-2">
+                      <p className="text-gray-500">スペック</p>
+                      <p className="font-medium text-gray-800">{part.spec}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          ) : query ? (
+            <div className="text-center py-10 text-gray-500">該当する部品が見つかりませんでした</div>
+          ) : (
+            <div className="text-center py-10 text-gray-500">検索キーワードを入力してください</div>
+          )}
         </div>
       </main>
     </div>
-  );
+  )
 }
