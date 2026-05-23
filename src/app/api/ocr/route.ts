@@ -11,20 +11,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'ファイルが見つかりません' }, { status: 400 })
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      generationConfig: { responseMimeType: "application/json" }
+    })
     const arrayBuffer = await file.arrayBuffer()
     const base64Data = Buffer.from(arrayBuffer).toString('base64')
 
     const prompt = `
-      この画像から「車体番号(VIN)」「部品番号(Part Number)」「部品名称(Part Name)」「スペック(Spec)」を抽出してください。
-      回答は以下のJSON形式のみで返してください。
-      {
-        "vin": "見つかった車体番号、なければ空文字列",
-        "part_number": "見つかった部品番号、なければ空文字列",
-        "part_name": "部品の名前（電球、ブレーキオイルなど）、推測できればその名前",
-        "spec": "電圧、電力、容量などのスペック情報",
-        "category": "部品のカテゴリ（電球、油脂類、エンジン部品など）"
-      }
+      この画像は自動車部品のリスト（納品書やパーツリスト）です。
+      画像全体を解析し、記載されている「車体番号(VIN)」と「すべての部品情報」を抽出してください。
+      
+      抽出ルール:
+      1. 画像の上部などに「車体番号(VIN)」があれば、すべての部品に対して同じVINを付与してください。
+      2. 表形式の場合、すべての行を読み取ってください。
+      3. 部品番号、部品名称、スペック、カテゴリを抽出してください。
+      
+      以下のJSON配列形式のみで回答してください:
+      [
+        {
+          "vin": "車体番号",
+          "part_number": "部品番号",
+          "part_name": "部品名称",
+          "spec": "スペック情報(あれば)",
+          "category": "カテゴリ(電球, 油脂類, エンジン部品など)"
+        },
+        ...
+      ]
     `
 
     const result = await model.generateContent([
@@ -38,12 +51,14 @@ export async function POST(request: Request) {
     ])
 
     const responseText = result.response.text()
-    const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim()
-    const partData = JSON.parse(cleanedJson)
+    // 堅牢なJSON抽出
+    const jsonMatch = responseText.match(/\[[\s\S]*\]/)
+    const cleanedJson = jsonMatch ? jsonMatch[0] : responseText
+    const partsData = JSON.parse(cleanedJson)
 
-    return NextResponse.json(partData)
-  } catch (error) {
+    return NextResponse.json(partsData)
+  } catch (error: any) {
     console.error('OCR Error:', error)
-    return NextResponse.json({ error: '画像の解析に失敗しました' }, { status: 500 })
+    return NextResponse.json({ error: '解析失敗: ' + (error.message || '不明なエラー') }, { status: 500 })
   }
 }
