@@ -12,8 +12,7 @@ export async function POST(request: Request) {
     }
 
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
-      generationConfig: { responseMimeType: "application/json" }
+      model: 'gemini-1.5-flash'
     })
 
     const arrayBuffer = await file.arrayBuffer()
@@ -28,16 +27,15 @@ export async function POST(request: Request) {
       2. 表形式の場合、すべての行を読み取ってください。
       3. 部品番号、部品名称、スペック、カテゴリを抽出してください。
       
-      以下のJSON配列形式のみで回答してください:
+      回答は必ず以下のJSON配列形式のみで返してください。余計な説明は不要です:
       [
         {
           "vin": "車体番号",
           "part_number": "部品番号",
           "part_name": "部品名称",
-          "spec": "スペック情報(あれば)",
-          "category": "カテゴリ(電球, 油脂類, エンジン部品など)"
-        },
-        ...
+          "spec": "スペック情報",
+          "category": "カテゴリ"
+        }
       ]
     `
 
