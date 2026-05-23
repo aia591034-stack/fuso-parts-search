@@ -76,7 +76,7 @@ export default function BulkRegisterPage() {
           <label className="block text-sm font-bold text-gray-700 mb-2">共通の車体番号 (VIN)</label>
           <input 
             type="text" 
-            className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-lg"
+            className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-black font-bold text-lg placeholder:text-gray-500"
             placeholder="例: FE638EV-123456"
             value={vin}
             onChange={(e) => setVin(e.target.value)}

@@ -108,12 +108,12 @@ export default function AdminPage() {
                       {editingId === part.id ? (
                         <div className="space-y-2">
                           <input 
-                            className="w-full border-b focus:border-blue-500 outline-none font-bold"
+                            className="w-full border-b border-gray-300 focus:border-blue-500 outline-none font-bold text-black bg-gray-50 px-1"
                             value={editForm.part_name || ''}
                             onChange={(e) => setEditForm({...editForm, part_name: e.target.value})}
                           />
                           <input 
-                            className="w-full border-b focus:border-blue-500 outline-none text-sm font-mono text-blue-600"
+                            className="w-full border-b border-gray-300 focus:border-blue-500 outline-none text-sm font-mono text-black font-bold bg-gray-50 px-1"
                             value={editForm.part_number || ''}
                             onChange={(e) => setEditForm({...editForm, part_number: e.target.value})}
                           />

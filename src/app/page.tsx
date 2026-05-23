@@ -82,7 +82,7 @@ export default function HomePage() {
             <input
               type="text"
               placeholder="車体番号、品名、スペックなどで検索"
-              className="block w-full pl-10 pr-3 py-3 border-2 border-transparent bg-white rounded-xl shadow-sm focus:border-blue-500 focus:ring-0 text-base outline-none transition-all"
+              className="block w-full pl-10 pr-3 py-3 border-2 border-transparent bg-white rounded-xl shadow-sm focus:border-blue-500 focus:ring-0 text-lg outline-none transition-all text-black font-bold placeholder:text-gray-500"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
