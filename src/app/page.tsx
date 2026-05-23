@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Search, Camera, Plus, Package } from 'lucide-react'
+import { Search, Camera, Plus, Package, Settings } from 'lucide-react'
 import Link from 'next/link'
 
 type Part = {
@@ -12,6 +12,7 @@ type Part = {
   part_name: string
   spec: string | null
   category: string | null
+  quantity: number
 }
 
 export default function HomePage() {
@@ -30,7 +31,8 @@ export default function HomePage() {
       .from('parts')
       .select('*')
       .or(`vin.ilike.%${searchQuery}%,part_name.ilike.%${searchQuery}%,spec.ilike.%${searchQuery}%,part_number.ilike.%${searchQuery}%`)
-      .limit(50)
+      .order('created_at', { ascending: true }) // 登録順に表示
+      .limit(100) // 上限を100件に拡大
 
     if (error) {
       console.error(error)
@@ -48,79 +50,109 @@ export default function HomePage() {
   }, [query, handleSearch])
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
-            <Package size={24} />
-            FUSO 部品検索
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* Header - Compact */}
+      <header className="bg-blue-600 text-white shadow-md sticky top-0 z-20">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-bold flex items-center gap-2">
+            <Package size={20} />
+            ふそう部品検索
           </h1>
-          <div className="flex gap-2">
-            <Link href="/register" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-              <Plus size={24} />
+          <div className="flex gap-1 items-center">
+            <Link href="/admin" className="p-2 hover:bg-blue-700 rounded-lg transition-colors" title="マスター管理">
+              <Settings size={20} />
             </Link>
-            <Link href="/ocr" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-              <Camera size={24} />
+            <Link href="/register/bulk" className="p-2 hover:bg-blue-700 rounded-lg transition-colors" title="一括登録">
+              <Plus size={20} />
+            </Link>
+            <Link href="/ocr" className="p-2 hover:bg-blue-700 rounded-lg transition-colors" title="写真で登録">
+              <Camera size={20} />
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-6">
-        {/* Search Bar */}
-        <div className="relative mb-8">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400" />
+      <main className="flex-1 max-w-5xl mx-auto w-full px-2 py-4">
+        {/* Search Bar - Fixed at top of main */}
+        <div className="sticky top-[60px] z-10 pb-4 bg-gray-50">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500" />
+            </div>
+            <input
+              type="text"
+              placeholder="車体番号、品名、スペックなどで検索"
+              className="block w-full pl-10 pr-3 py-3 border-2 border-transparent bg-white rounded-xl shadow-sm focus:border-blue-500 focus:ring-0 text-base outline-none transition-all"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
           </div>
-          <input
-            type="text"
-            placeholder="車体番号、品名(電球など)、スペック(24Vなど)で検索"
-            className="block w-full pl-10 pr-3 py-4 border-none bg-white rounded-2xl shadow-sm focus:ring-2 focus:ring-blue-500 text-lg"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
         </div>
 
-        {/* Results */}
-        <div className="space-y-4">
+        {/* Results - Compact List View */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           {loading ? (
-            <div className="text-center py-10 text-gray-500">検索中...</div>
+            <div className="text-center py-10 text-gray-500 bg-white">
+              <div className="animate-spin inline-block w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mb-2"></div>
+              <p>検索中...</p>
+            </div>
           ) : parts.length > 0 ? (
-            parts.map((part) => (
-              <div key={part.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 transition-all hover:shadow-md">
-                <div className="flex justify-between items-start mb-2">
-                  <h2 className="text-lg font-bold text-gray-800">{part.part_name}</h2>
-                  <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2 py-1 rounded">
-                    {part.category || '部品'}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-500">部品番号</p>
-                    <p className="font-mono text-lg font-bold text-blue-600">{part.part_number}</p>
-                  </div>
-                  {part.vin && (
-                    <div>
-                      <p className="text-gray-500">車体番号</p>
-                      <p className="font-medium text-gray-800">{part.vin}</p>
-                    </div>
-                  )}
-                  {part.spec && (
-                    <div className="col-span-2">
-                      <p className="text-gray-500">スペック</p>
-                      <p className="font-medium text-gray-800">{part.spec}</p>
-                    </div>
-                  )}
-                </div>
+            <div className="divide-y divide-gray-100">
+              {/* Table Header for Desktop */}
+              <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-2 bg-gray-50 text-[10px] font-bold text-gray-500 uppercase">
+                <div className="col-span-1 text-center">個数</div>
+                <div className="col-span-4">部品名称</div>
+                <div className="col-span-4">部品番号</div>
+                <div className="col-span-3 text-right">車体番号 / スペック</div>
               </div>
-            ))
+
+              {parts.map((part) => (
+                <div key={part.id} className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-2 px-3 py-2 md:py-3 hover:bg-blue-50/50 transition-colors items-center">
+                  {/* Quantity & Name (Mobile/Desktop mixed) */}
+                  <div className="col-span-1 flex justify-center md:block">
+                    <span className={`inline-flex items-center justify-center w-8 h-8 md:w-full md:h-auto rounded-full md:rounded-lg font-bold ${part.quantity > 1 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'} text-sm py-1`}>
+                      {part.quantity}<span className="text-[10px] ml-0.5 md:hidden">点</span>
+                    </span>
+                  </div>
+                  
+                  <div className="col-span-11 md:col-span-4">
+                    <p className="font-bold text-gray-800 text-sm md:text-base leading-tight">{part.part_name}</p>
+                    <p className="text-[10px] text-gray-400 md:hidden">{part.category || '部品'}</p>
+                  </div>
+
+                  <div className="col-span-11 md:col-span-4 offset-1 md:offset-0">
+                    <p className="font-mono text-blue-600 font-bold text-sm md:text-base tracking-tight">{part.part_number}</p>
+                  </div>
+
+                  <div className="col-span-11 md:col-span-3 text-right offset-1 md:offset-0">
+                    {part.vin && (
+                      <p className="text-[11px] text-gray-500 font-medium">{part.vin}</p>
+                    )}
+                    {part.spec && (
+                      <p className="text-[10px] text-blue-500 italic truncate">{part.spec}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : query ? (
-            <div className="text-center py-10 text-gray-500">該当する部品が見つかりませんでした</div>
+            <div className="text-center py-10 text-gray-400 bg-white italic">
+              該当する部品が見つかりませんでした
+            </div>
           ) : (
-            <div className="text-center py-10 text-gray-500">検索キーワードを入力してください</div>
+            <div className="text-center py-16 text-gray-400 bg-white">
+              <Package size={48} className="mx-auto mb-4 opacity-20" />
+              <p>キーワードを入力して検索を開始してください</p>
+              <p className="text-xs mt-2 text-gray-300">例: FE638, 電球, 24V, MH...</p>
+            </div>
           )}
         </div>
+        
+        {parts.length > 0 && !loading && (
+          <p className="text-center text-[10px] text-gray-400 mt-4">
+            全 {parts.length} 件を表示中
+          </p>
+        )}
       </main>
     </div>
   )
