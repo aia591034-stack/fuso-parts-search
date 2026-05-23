@@ -107,30 +107,40 @@ export default function HomePage() {
               </div>
 
               {parts.map((part) => (
-                <div key={part.id} className="grid grid-cols-1 md:grid-cols-12 gap-1 md:gap-2 px-3 py-2 md:py-3 hover:bg-blue-50/50 transition-colors items-center">
-                  {/* Quantity & Name (Mobile/Desktop mixed) */}
-                  <div className="col-span-1 flex justify-center md:block">
-                    <span className={`inline-flex items-center justify-center w-8 h-8 md:w-full md:h-auto rounded-full md:rounded-lg font-bold ${part.quantity > 1 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-600'} text-sm py-1`}>
-                      {part.quantity}<span className="text-[10px] ml-0.5 md:hidden">点</span>
+                <div key={part.id} className="flex md:grid md:grid-cols-12 gap-3 px-3 py-2 md:py-3 hover:bg-blue-50/50 transition-colors items-center">
+                  {/* Quantity - Left on mobile, Column 1 on desktop */}
+                  <div className="flex-shrink-0 w-10 md:w-full md:col-span-1 text-center">
+                    <span className={`inline-flex items-center justify-center w-full rounded-lg font-black ${part.quantity > 1 ? 'bg-orange-100 text-orange-700' : 'bg-gray-100 text-gray-700'} text-base py-1.5 md:py-1`}>
+                      {part.quantity}
                     </span>
+                    <span className="text-[9px] font-bold text-gray-400 md:hidden">個</span>
                   </div>
                   
-                  <div className="col-span-11 md:col-span-4">
-                    <p className="font-bold text-gray-800 text-sm md:text-base leading-tight">{part.part_name}</p>
-                    <p className="text-[10px] text-gray-400 md:hidden">{part.category || '部品'}</p>
+                  {/* Name & Number Container - Right of quantity on mobile */}
+                  <div className="flex-1 md:col-span-8 grid md:grid-cols-8 gap-1 md:gap-2">
+                    <div className="md:col-span-4">
+                      <p className="font-bold text-gray-900 text-sm md:text-base leading-tight">{part.part_name}</p>
+                      <p className="text-[10px] text-gray-400 md:hidden">{part.category || '部品'}</p>
+                    </div>
+                    <div className="md:col-span-4">
+                      <p className="font-mono text-blue-700 font-bold text-sm md:text-base tracking-tight">{part.part_number}</p>
+                    </div>
                   </div>
 
-                  <div className="col-span-11 md:col-span-4 offset-1 md:offset-0">
-                    <p className="font-mono text-blue-600 font-bold text-sm md:text-base tracking-tight">{part.part_number}</p>
-                  </div>
-
-                  <div className="col-span-11 md:col-span-3 text-right offset-1 md:offset-0">
+                  {/* VIN & Spec - Bottom/Right */}
+                  <div className="hidden md:block md:col-span-3 text-right">
                     {part.vin && (
                       <p className="text-[11px] text-gray-500 font-medium">{part.vin}</p>
                     )}
                     {part.spec && (
                       <p className="text-[10px] text-blue-500 italic truncate">{part.spec}</p>
                     )}
+                  </div>
+                  
+                  {/* Mobile Spec/VIN - small badge style */}
+                  <div className="md:hidden flex flex-col items-end gap-1">
+                    {part.vin && <span className="text-[9px] bg-gray-100 text-gray-500 px-1 rounded">{part.vin.slice(-4)}</span>}
+                    {part.spec && <span className="text-[9px] text-blue-400 italic">{part.spec}</span>}
                   </div>
                 </div>
               ))}
