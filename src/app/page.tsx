@@ -54,7 +54,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-blue-600 flex items-center gap-2">
             <Package size={24} />
-            ふそう部品検索
+            FUSO 部品検索
           </h1>
           <div className="flex gap-2">
             <Link href="/register" className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
