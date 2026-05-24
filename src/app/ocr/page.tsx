@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Camera, ArrowLeft, Upload, Loader2, Check, Package } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import AutocompleteInput from '@/components/AutocompleteInput'
 
 export default function OCRPage() {
   const [loading, setLoading] = useState(false)
@@ -68,6 +69,16 @@ export default function OCRPage() {
     setResults(newResults)
   }
 
+  const handleSelectPart = (index: number, item: any) => {
+    const newResults = [...results]
+    newResults[index] = {
+      ...newResults[index],
+      part_number: item.part_number,
+      part_name: item.part_name
+    }
+    setResults(newResults)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white shadow-sm p-4 flex items-center gap-4">
@@ -120,29 +131,32 @@ export default function OCRPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="col-span-2">
                         <label className="text-[10px] text-gray-400 font-bold uppercase">部品名称</label>
-                        <input 
-                          type="text" 
-                          className="w-full border-b py-1 focus:outline-none focus:border-blue-500 font-medium"
+                        <AutocompleteInput
+                          column="part_name"
                           value={result.part_name}
-                          onChange={(e) => updateResult(idx, 'part_name', e.target.value)}
+                          onChange={(val) => updateResult(idx, 'part_name', val)}
+                          onSelect={(item) => handleSelectPart(idx, item)}
+                          inputClassName="w-full border-b py-1 focus:outline-none focus:border-blue-500 font-medium text-black"
                         />
                       </div>
                       <div>
                         <label className="text-[10px] text-gray-400 font-bold uppercase">部品番号</label>
-                        <input 
-                          type="text" 
-                          className="w-full border-b py-1 focus:outline-none focus:border-blue-500 font-mono font-bold text-blue-600"
+                        <AutocompleteInput
+                          column="part_number"
                           value={result.part_number}
-                          onChange={(e) => updateResult(idx, 'part_number', e.target.value)}
+                          onChange={(val) => updateResult(idx, 'part_number', val)}
+                          onSelect={(item) => handleSelectPart(idx, item)}
+                          inputClassName="w-full border-b py-1 focus:outline-none focus:border-blue-500 font-mono font-bold text-blue-600"
                         />
                       </div>
                       <div>
                         <label className="text-[10px] text-gray-400 font-bold uppercase">車体番号</label>
-                        <input 
-                          type="text" 
-                          className="w-full border-b py-1 focus:outline-none focus:border-blue-500 text-sm"
+                        <AutocompleteInput
+                          column="vin"
                           value={result.vin}
-                          onChange={(e) => updateResult(idx, 'vin', e.target.value)}
+                          onChange={(val) => updateResult(idx, 'vin', val)}
+                          onSelect={(item) => updateResult(idx, 'vin', item.vin)}
+                          inputClassName="w-full border-b py-1 focus:outline-none focus:border-blue-500 text-sm text-black"
                         />
                       </div>
                     </div>

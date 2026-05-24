@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Search, Camera, Plus, Package, Edit2, Trash2, ArrowLeft, Check, X } from 'lucide-react'
+import { Search, Plus, Edit2, Trash2, ArrowLeft, Check, X } from 'lucide-react'
 import Link from 'next/link'
+import AutocompleteInput from '@/components/AutocompleteInput'
 
 type Part = {
   id: string
@@ -62,6 +63,14 @@ export default function AdminPage() {
     }
   }
 
+  const handleSelectPart = (item: any) => {
+    setEditForm({
+      ...editForm,
+      part_name: item.part_name,
+      part_number: item.part_number
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <header className="bg-white shadow-sm p-4 flex items-center justify-between sticky top-0 z-10">
@@ -80,7 +89,7 @@ export default function AdminPage() {
           <input 
             type="text" 
             placeholder="マスター内を検索 (車体番号、部品番号など)"
-            className="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-3 rounded-xl border-none shadow-sm focus:ring-2 focus:ring-blue-500 text-black"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -92,7 +101,7 @@ export default function AdminPage() {
               <tr>
                 <th className="px-6 py-4">部品名称 / 番号</th>
                 <th className="px-6 py-4">車体番号</th>
-                <th className="px-6 py-4">個数</th>
+                <th className="px-6 py-4 text-center">個数</th>
                 <th className="px-6 py-4 text-right">操作</th>
               </tr>
             </thead>
@@ -106,16 +115,20 @@ export default function AdminPage() {
                   <tr key={part.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
                       {editingId === part.id ? (
-                        <div className="space-y-2">
-                          <input 
-                            className="w-full border-b border-gray-300 focus:border-blue-500 outline-none font-bold text-black bg-gray-50 px-1"
+                        <div className="space-y-2 max-w-xs">
+                          <AutocompleteInput
+                            column="part_name"
                             value={editForm.part_name || ''}
-                            onChange={(e) => setEditForm({...editForm, part_name: e.target.value})}
+                            onChange={(val) => setEditForm({...editForm, part_name: val})}
+                            onSelect={handleSelectPart}
+                            inputClassName="w-full border-b border-gray-300 focus:border-blue-500 outline-none font-bold text-black bg-gray-50 px-1"
                           />
-                          <input 
-                            className="w-full border-b border-gray-300 focus:border-blue-500 outline-none text-sm font-mono text-black font-bold bg-gray-50 px-1"
+                          <AutocompleteInput
+                            column="part_number"
                             value={editForm.part_number || ''}
-                            onChange={(e) => setEditForm({...editForm, part_number: e.target.value})}
+                            onChange={(val) => setEditForm({...editForm, part_number: val})}
+                            onSelect={handleSelectPart}
+                            inputClassName="w-full border-b border-gray-300 focus:border-blue-500 outline-none text-sm font-mono text-black font-bold bg-gray-50 px-1"
                           />
                         </div>
                       ) : (
@@ -127,10 +140,12 @@ export default function AdminPage() {
                     </td>
                     <td className="px-6 py-4">
                       {editingId === part.id ? (
-                        <input 
-                          className="w-full border-b focus:border-blue-500 outline-none text-sm"
+                        <AutocompleteInput
+                          column="vin"
                           value={editForm.vin || ''}
-                          onChange={(e) => setEditForm({...editForm, vin: e.target.value})}
+                          onChange={(val) => setEditForm({...editForm, vin: val})}
+                          onSelect={(item) => setEditForm({...editForm, vin: item.vin})}
+                          inputClassName="w-full border-b focus:border-blue-500 outline-none text-sm text-black"
                         />
                       ) : (
                         <span className="text-sm text-gray-600">{part.vin || '-'}</span>
@@ -140,7 +155,7 @@ export default function AdminPage() {
                       {editingId === part.id ? (
                         <input 
                           type="number"
-                          className="w-16 border-b focus:border-blue-500 outline-none text-center"
+                          className="w-16 border-b focus:border-blue-500 outline-none text-center text-black"
                           value={editForm.quantity || 1}
                           onChange={(e) => setEditForm({...editForm, quantity: parseInt(e.target.value)})}
                         />
@@ -153,7 +168,7 @@ export default function AdminPage() {
                         {editingId === part.id ? (
                           <>
                             <button onClick={handleUpdate} className="p-2 text-green-600 hover:bg-green-50 rounded-lg"><Check size={20} /></button>
-                            <button onClick={() => setEditingId(null)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg"><X size={20} /></button>
+                            <button onClick={() => setEditingId(null)} className="p-2 text-gray-400 hover:bg-100 rounded-lg"><X size={20} /></button>
                           </>
                         ) : (
                           <>

@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Save, Plus, Trash2, Package } from 'lucide-react'
+import { ArrowLeft, Save, Plus, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import AutocompleteInput from '@/components/AutocompleteInput'
 
 type BulkPart = {
   part_number: string
@@ -30,6 +31,16 @@ export default function BulkRegisterPage() {
   const updateRow = (index: number, field: keyof BulkPart, value: string | number) => {
     const newParts = [...parts]
     newParts[index] = { ...newParts[index], [field]: value }
+    setParts(newParts)
+  }
+
+  const handleSelectPart = (index: number, item: any) => {
+    const newParts = [...parts]
+    newParts[index] = {
+      ...newParts[index],
+      part_number: item.part_number,
+      part_name: item.part_name
+    }
     setParts(newParts)
   }
 
@@ -74,12 +85,13 @@ export default function BulkRegisterPage() {
       <main className="flex-1 p-4 max-w-4xl mx-auto w-full pb-24">
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6">
           <label className="block text-sm font-bold text-gray-700 mb-2">共通の車体番号 (VIN)</label>
-          <input 
-            type="text" 
-            className="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-black font-bold text-lg placeholder:text-gray-500"
-            placeholder="例: FE638EV-123456"
+          <AutocompleteInput
+            column="vin"
             value={vin}
-            onChange={(e) => setVin(e.target.value)}
+            onChange={(val) => setVin(val)}
+            onSelect={(item) => setVin(item.vin)}
+            placeholder="例: FE638EV-123456"
+            inputClassName="w-full border-2 border-gray-200 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 outline-none text-black font-bold text-lg placeholder:text-gray-500"
           />
         </div>
 
@@ -95,22 +107,24 @@ export default function BulkRegisterPage() {
             <div key={idx} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
               <div className="col-span-1 md:col-span-5">
                 <label className="block text-xs text-gray-700 font-extrabold mb-1">部品名称</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none text-black font-bold text-lg placeholder:text-gray-400"
+                <AutocompleteInput
+                  column="part_name"
                   value={part.part_name}
-                  onChange={(e) => updateRow(idx, 'part_name', e.target.value)}
+                  onChange={(val) => updateRow(idx, 'part_name', val)}
+                  onSelect={(item) => handleSelectPart(idx, item)}
                   placeholder="例: オイルシール"
+                  inputClassName="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none text-black font-bold text-lg placeholder:text-gray-400"
                 />
               </div>
               <div className="col-span-1 md:col-span-4">
                 <label className="block text-xs text-gray-700 font-extrabold mb-1">部品番号</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none font-mono text-black font-black text-lg placeholder:text-gray-400"
+                <AutocompleteInput
+                  column="part_number"
                   value={part.part_number}
-                  onChange={(e) => updateRow(idx, 'part_number', e.target.value)}
+                  onChange={(val) => updateRow(idx, 'part_number', val)}
+                  onSelect={(item) => handleSelectPart(idx, item)}
                   placeholder="例: MH034180"
+                  inputClassName="w-full bg-gray-100 border-2 border-gray-200 rounded-lg px-3 py-3 focus:bg-white focus:border-blue-600 outline-none font-mono text-black font-black text-lg placeholder:text-gray-400"
                 />
               </div>
               <div className="col-span-1 md:col-span-2">
