@@ -56,7 +56,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <h1 className="text-lg font-bold flex items-center gap-2">
             <Package size={20} />
-            ふそう部品検索
+            部品検索
           </h1>
           <div className="flex gap-1 items-center">
             <Link href="/admin" className="p-2 hover:bg-blue-700 rounded-lg transition-colors" title="マスター管理">

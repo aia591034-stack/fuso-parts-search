@@ -27,7 +27,7 @@ export default function LoginPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">ふそう部品検索ログイン</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">部品検索ログイン</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">合言葉（パスワード）</label>
